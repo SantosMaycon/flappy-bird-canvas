@@ -4,6 +4,24 @@ sprites.src = './sprites.png'
 const canvas = document.querySelector('canvas')
 const contexto = canvas.getContext('2d')
 
+const startGame = {
+  sourceX: 134,
+  sourceY: 0,
+  largura: 174,
+  altura: 152,
+  x: (canvas.width / 2) - 174 / 2,
+  y: 50,
+  desenhar() {
+    contexto.drawImage(
+      sprites,
+      startGame.sourceX, startGame.sourceY, // Coordenadas no sprite
+      startGame.largura, startGame.altura,
+      startGame.x, startGame.y, // Coordenadas no canvas
+      startGame.largura, startGame.altura
+    )
+  }
+}
+
 const planoDeFundo = {
   sourceX: 390,
   sourceY: 0,
@@ -66,6 +84,13 @@ const flappyBird = {
   altura: 24,
   x: 10,
   y: 50,
+  gravidade: .25,
+  velocidade: 0,
+  atualizar() {
+    flappyBird.velocidade += flappyBird.gravidade
+    flappyBird.y += flappyBird.velocidade
+    console.log(flappyBird.y)
+  },
   desenhar() {
     contexto.drawImage(
       sprites,
@@ -77,10 +102,54 @@ const flappyBird = {
   }
 }
 
+// Tela
+
+let telaAtiva = {}
+function mudarParaTela(novaTela) {
+  telaAtiva = novaTela
+}
+
+const Tela = {}
+  
+Tela.INICIO = {
+  desenhar() {
+    planoDeFundo.desenhar()
+    chao.desenhar()
+    flappyBird.desenhar()
+    startGame.desenhar()
+  },
+  click() {
+    mudarParaTela(Tela.JOGO)
+  },
+  atualizar() {
+  }
+}
+
+Tela.JOGO = {
+  desenhar() {
+    planoDeFundo.desenhar()
+    chao.desenhar()
+    flappyBird.desenhar()
+  },
+  atualizar() {
+    flappyBird.atualizar()
+  }
+}
+
 function loop() {
-  planoDeFundo.desenhar()
-  chao.desenhar()
-  flappyBird.desenhar()
+  
+  telaAtiva.desenhar()
+  telaAtiva.atualizar()
 
   requestAnimationFrame(loop)
-} loop()
+} 
+
+window.addEventListener('click', () => {
+  if(telaAtiva.click) {
+    telaAtiva.click()
+  }
+})
+
+mudarParaTela(Tela.INICIO)  
+loop()
+
