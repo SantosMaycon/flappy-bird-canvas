@@ -1,6 +1,9 @@
 const sprites = new Image()
 sprites.src = './sprites.png'
 
+const sound_hit = new Audio()
+sound_hit.src = './sounds/hit.wav'
+
 const canvas = document.querySelector('canvas')
 const contexto = canvas.getContext('2d')
 
@@ -86,10 +89,31 @@ const flappyBird = {
   y: 50,
   gravidade: .25,
   velocidade: 0,
+  pulo: 4.6,
+  respawn() {
+    setTimeout(() => sound_hit.play(), 400)
+    setTimeout(() => {
+      flappyBird.x = 10
+      flappyBird.y = 50
+      flappyBird.velocidade = 0
+    }, 1100)
+  } ,
+  colidu() {
+    if (flappyBird.y >= chao.y - flappyBird.altura)
+      return true
+  },
+  pular() {
+    flappyBird.velocidade = -flappyBird.pulo
+  },
   atualizar() {
+    if (flappyBird.colidu()) {
+      mudarParaTela(Tela.INICIO)
+      flappyBird.respawn()
+      return
+    }
+
     flappyBird.velocidade += flappyBird.gravidade
     flappyBird.y += flappyBird.velocidade
-    console.log(flappyBird.y)
   },
   desenhar() {
     contexto.drawImage(
@@ -110,7 +134,7 @@ function mudarParaTela(novaTela) {
 }
 
 const Tela = {}
-  
+
 Tela.INICIO = {
   desenhar() {
     planoDeFundo.desenhar()
@@ -131,6 +155,9 @@ Tela.JOGO = {
     chao.desenhar()
     flappyBird.desenhar()
   },
+  click() {
+    flappyBird.pular()
+  },
   atualizar() {
     flappyBird.atualizar()
   }
@@ -142,7 +169,7 @@ function loop() {
   telaAtiva.atualizar()
 
   requestAnimationFrame(loop)
-} 
+}
 
 window.addEventListener('click', () => {
   if(telaAtiva.click) {
