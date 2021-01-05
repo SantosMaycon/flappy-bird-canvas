@@ -7,6 +7,8 @@ sound_hit.src = './sounds/hit.wav'
 const canvas = document.querySelector('canvas')
 const contexto = canvas.getContext('2d')
 
+let frames = 0
+
 const startGame = {
   sourceX: 134,
   sourceY: 0,
@@ -61,6 +63,14 @@ const chao = {
   altura: 112,
   x: 0,
   y: canvas.height - 112,
+  atualizar() {
+    // logica para movimentar o chão infinitamente
+    const movimentoDoChao = 1
+    const repeteEm = chao.largura / 2
+    const movimentacao = chao.x - movimentoDoChao
+
+    chao.x = movimentacao % repeteEm
+  },
   desenhar() {
     contexto.drawImage(
       sprites,
@@ -115,7 +125,31 @@ const flappyBird = {
     flappyBird.velocidade += flappyBird.gravidade
     flappyBird.y += flappyBird.velocidade
   },
+  movimentos: [
+    { spriteX: 0, spriteY: 0 },
+    { spriteX: 0, spriteY: 26 },
+    { spriteX: 0, spriteY: 52 }
+  ],
+  frameAtual: 0,
+  atualizarOFrameAtual() {
+    const intervalo = 10
+    const passouOIntervalo = frames % intervalo === 0
+
+    if (passouOIntervalo) {
+      const baseDoFrame = 1
+      const incremento = baseDoFrame + flappyBird.frameAtual
+      const baseRepeticao = flappyBird.movimentos.length
+      flappyBird.frameAtual = incremento % baseRepeticao
+    }
+  },
   desenhar() {
+    flappyBird.atualizarOFrameAtual()
+
+    const { spriteX, spriteY } = flappyBird.movimentos[flappyBird.frameAtual]
+    
+    flappyBird.sourceX = spriteX
+    flappyBird.sourceY = spriteY
+
     contexto.drawImage(
       sprites,
       flappyBird.sourceX, flappyBird.sourceY, // Coordenadas no sprite
@@ -146,6 +180,7 @@ Tela.INICIO = {
     mudarParaTela(Tela.JOGO)
   },
   atualizar() {
+    chao.atualizar()
   }
 }
 
@@ -160,13 +195,15 @@ Tela.JOGO = {
   },
   atualizar() {
     flappyBird.atualizar()
+    chao.atualizar()
   }
 }
 
 function loop() {
-  
   telaAtiva.desenhar()
   telaAtiva.atualizar()
+
+  frames += 1
 
   requestAnimationFrame(loop)
 }
@@ -179,4 +216,3 @@ window.addEventListener('click', () => {
 
 mudarParaTela(Tela.INICIO)  
 loop()
-
