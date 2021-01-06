@@ -128,26 +128,58 @@ const canos = {
         canoChaoX, canoChaoY,
         canos.largura, canos.altura,
       )
+
+      par.canoCeu = {
+        x: canoCeuX,
+        y: canos.altura + canoCeuY
+      }
+      par.canoChao = {
+        x: canoChaoX,
+        y: canoChaoY
+      }
     })
+  },
+  colidiuComOBird(par) {
+    const cabecaDoFlappy = flappyBird.y;
+    const peDoFlappy = flappyBird.y + flappyBird.altura;
+    
+    if(flappyBird.x >= par.x) {
+      if(cabecaDoFlappy <= par.canoCeu.y) {
+        return true;
+      }
+      
+      if(peDoFlappy >= par.canoChao.y) {
+        return true;
+      }
+    }
+    return false;
   },
   pares: [],
   atualizar() {
     const passou100Frames = frames % 100 === 0
     if (passou100Frames) {
-      console.log(frames)
       canos.pares.push({ 
         x: canvas.width, 
-        y: -150 * (Math.random() + 1)
+        y: -150 * (Math.random() + 1) // y: -350
       })
     }
 
     canos.pares.forEach((par) => {
       par.x += -2
 
+      if (canos.colidiuComOBird(par)) {
+        console.log("Colidiu")
+        mudarParaTela(Tela.INICIO)
+        flappyBird.respawn()
+        canos.pares = []
+        return
+      }
+
       if (par.x < -canos.largura) {
         canos.pares.shift()
       }
     })
+
   }
 }
 
@@ -157,7 +189,7 @@ const flappyBird = {
   largura: 33,
   altura: 24,
   x: 10,
-  y: 50,
+  y: 50 + 65,
   gravidade: .25,
   velocidade: 0,
   pulo: 4.6,
@@ -233,31 +265,31 @@ const Tela = {}
 Tela.INICIO = {
   desenhar() {
     planoDeFundo.desenhar()
-    canos.desenhar()
     flappyBird.desenhar()
     chao.desenhar()
-    //startGame.desenhar()
+    startGame.desenhar()
   },
   click() {
     mudarParaTela(Tela.JOGO)
   },
   atualizar() {
     chao.atualizar()
-    canos.atualizar()
   }
 }
 
 Tela.JOGO = {
   desenhar() {
     planoDeFundo.desenhar()
-    chao.desenhar()
+    canos.desenhar()
     flappyBird.desenhar()
+    chao.desenhar()
   },
   click() {
     flappyBird.pular()
   },
   atualizar() {
     flappyBird.atualizar()
+    canos.atualizar()
     chao.atualizar()
   }
 }
