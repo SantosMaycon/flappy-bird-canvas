@@ -90,6 +90,67 @@ const chao = {
   }
 }
 
+const canos = {
+  largura: 52,
+  altura: 400,
+  chao: {
+    sourceX: 0,
+    sourceY: 169
+  },
+  ceu: {
+    sourceX: 52,
+    sourceY: 169
+  },
+  espaco: 80,
+  desenhar() {
+    canos.pares.forEach((par) => {
+      const espacamentoEntreCanos = 90
+      const yRandom = par.y
+  
+      // Cano ceu
+      const canoCeuX = par.x
+      const canoCeuY = yRandom
+      contexto.drawImage(
+        sprites,
+        canos.ceu.sourceX, canos.ceu.sourceY, // Coordenadas no sprite
+        canos.largura, canos.altura,
+        canoCeuX, canoCeuY, // Coordenadas no canvas
+        canos.largura, canos.altura
+      )
+  
+      // Cano chao
+      const canoChaoX = par.x
+      const canoChaoY = canos.altura + espacamentoEntreCanos + yRandom
+      contexto.drawImage(
+        sprites,
+        canos.chao.sourceX, canos.chao.sourceY,
+        canos.largura, canos.altura,
+        canoChaoX, canoChaoY,
+        canos.largura, canos.altura,
+      )
+    })
+  },
+  pares: [],
+  atualizar() {
+    const passou100Frames = frames % 100 === 0
+    if (passou100Frames) {
+      console.log(frames)
+      canos.pares.push({ 
+        x: canvas.width, 
+        y: -150 * (Math.random() + 1)
+      })
+    }
+
+    canos.pares.forEach((par) => {
+      par.x += -2
+
+      if (par.x < -canos.largura) {
+        canos.pares.shift()
+      }
+    })
+  }
+}
+
 const flappyBird = {
   sourceX: 0,
   sourceY: 0,
@@ -172,15 +233,17 @@ const Tela = {}
 Tela.INICIO = {
   desenhar() {
     planoDeFundo.desenhar()
-    chao.desenhar()
+    canos.desenhar()
     flappyBird.desenhar()
-    startGame.desenhar()
+    chao.desenhar()
+    //startGame.desenhar()
   },
   click() {
     mudarParaTela(Tela.JOGO)
   },
   atualizar() {
     chao.atualizar()
+    canos.atualizar()
   }
 }
 
@@ -200,7 +263,7 @@ Tela.JOGO = {
 }
 
 function loop() {
-  telaAtiva.desenhar()
+  telaAtiva.desenhar( )
   telaAtiva.atualizar()
 
   frames += 1
@@ -208,11 +271,17 @@ function loop() {
   requestAnimationFrame(loop)
 }
 
-window.addEventListener('click', () => {
+canvas.addEventListener('click', () => {
   if(telaAtiva.click) {
     telaAtiva.click()
   }
 })
+
+// window.addEventListener('keyup', ({keyCode}) => {
+//   if (keyCode === 32) {
+//     telaAtiva.click( )
+//   }
+// })
 
 mudarParaTela(Tela.INICIO)  
 loop()
