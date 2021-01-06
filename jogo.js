@@ -143,7 +143,7 @@ const canos = {
     const cabecaDoFlappy = flappyBird.y;
     const peDoFlappy = flappyBird.y + flappyBird.altura;
     
-    if(flappyBird.x >= par.x) {
+    if((flappyBird.largura) >= par.x) {
       if(cabecaDoFlappy <= par.canoCeu.y) {
         return true;
       }
@@ -172,6 +172,7 @@ const canos = {
         mudarParaTela(Tela.INICIO)
         flappyBird.respawn()
         canos.pares = []
+        frames = 0
         return
       }
 
@@ -194,6 +195,7 @@ const flappyBird = {
   velocidade: 0,
   pulo: 4.6,
   respawn() {
+    placar.pontuacao = 0
     setTimeout(() => sound_hit.play(), 400)
     setTimeout(() => {
       flappyBird.x = 10
@@ -253,6 +255,24 @@ const flappyBird = {
   }
 }
 
+const placar = {
+  pontuacao: 0,
+  desenhar() {
+    contexto.font = '15px "Press Start 2P"'
+    contexto.textAlign = 'right'
+    contexto.fillStyle = 'white'
+    contexto.fillText(placar.pontuacao, canvas.width - 15, 40)
+  },
+  atualizar() {
+    const intervalo = 10
+    const passouOIntervalo = frames % intervalo === 0
+
+    if (passouOIntervalo) {
+      placar.pontuacao += 1
+    }
+  }
+}
+
 // Tela
 
 let telaAtiva = {}
@@ -283,6 +303,7 @@ Tela.JOGO = {
     canos.desenhar()
     flappyBird.desenhar()
     chao.desenhar()
+    placar.desenhar()
   },
   click() {
     flappyBird.pular()
@@ -291,6 +312,7 @@ Tela.JOGO = {
     flappyBird.atualizar()
     canos.atualizar()
     chao.atualizar()
+    placar.atualizar()
   }
 }
 
